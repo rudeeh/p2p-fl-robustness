@@ -1,0 +1,6 @@
+interface:
+  display_name: "P2p Fl Robustness"
+  short_description: "Repo-specific patterns and workflows for p2p-fl-robustness"
+  default_prompt: "Use the p2p-fl-robustness repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
