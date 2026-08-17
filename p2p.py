@@ -125,6 +125,9 @@ class P2PSystem:
             agg = self._aggregate(pool)
             node.apply_update(agg)
 
+        # Expose last raw updates for analysis (observational only)
+        self._last_raw_updates = raw_updates
+
     # ------------------------------------------------------------------
     # Aggregation
     # ------------------------------------------------------------------
@@ -172,3 +175,22 @@ class P2PSystem:
             return 0.0, 1.0
 
         return float(np.mean(accs)), float(np.mean(losses))
+
+    # ------------------------------------------------------------------
+    # Analysis helpers (observational — do not modify training)
+    # ------------------------------------------------------------------
+
+    def get_global_weights(self) -> np.ndarray:
+        """Return mean weights across all honest nodes (P2P has no single global model)."""
+        honest = [n for n in self.nodes if not n.is_malicious]
+        if not honest:
+            return self.nodes[0].model.get_weights()
+        return np.mean([n.model.get_weights() for n in honest], axis=0)
+
+    def get_last_updates(self) -> dict:
+        """Return raw updates from the last round."""
+        return getattr(self, '_last_raw_updates', {})
+
+    def get_honest_weights(self) -> List[np.ndarray]:
+        """Return current weight vectors of all honest nodes."""
+        return [n.model.get_weights() for n in self.nodes if not n.is_malicious]

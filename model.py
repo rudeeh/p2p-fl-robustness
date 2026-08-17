@@ -61,6 +61,10 @@ class LogisticModel:
     def predict(self, X: np.ndarray) -> np.ndarray:
         return self.clf.predict(X)
 
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        """Return class probabilities. Shape (n_samples, n_classes)."""
+        return self.clf.predict_proba(X)
+
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         return float(self.clf.score(X, y))
 
@@ -112,3 +116,7 @@ class LogisticModel:
 
     def copy_weights_to(self, other: "LogisticModel") -> None:
         other.set_weights(self.get_weights().copy())
+
+    def get_classes(self) -> np.ndarray:
+        """Return the class labels the model was trained on."""
+        return self.classes_
