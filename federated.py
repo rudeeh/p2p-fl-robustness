@@ -110,6 +110,9 @@ class FederatedSystem:
         for node in self.nodes:
             node.apply_update(self.global_weights.copy())
 
+        # Expose last valid updates for analysis (observational only)
+        self._last_valid_updates = {i: valid_updates[i] for i in range(min(len(valid_updates), self.n_nodes))}
+
     # ------------------------------------------------------------------
     # Aggregation
     # ------------------------------------------------------------------
@@ -157,3 +160,24 @@ class FederatedSystem:
             return 0.0, 1.0
 
         return float(np.mean(accs)), float(np.mean(losses))
+
+    # ------------------------------------------------------------------
+    # Analysis helpers (observational — do not modify training)
+    # ------------------------------------------------------------------
+
+    def get_global_weights(self) -> np.ndarray:
+        """Return the current global model weights."""
+        if self.global_weights is not None:
+            return self.global_weights.copy()
+        return self.nodes[0].model.get_weights()
+
+    def get_last_updates(self) -> dict:
+        """Return raw updates from the last round."""
+        return getattr(self, '_last_valid_updates', {})
+
+    def get_honest_weights(self) -> List[np.ndarray]:
+        """Return current weight vectors of all honest nodes.
+        In FL, all nodes share the global model."""
+        if self.global_weights is not None:
+            return [self.global_weights.copy() for _ in self.nodes if not _.is_malicious]
+        return [n.model.get_weights() for n in self.nodes if not n.is_malicious]
